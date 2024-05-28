@@ -1,0 +1,13 @@
+<launch>
+    <arg name="image_topic"         default="/rgb/image_raw" />
+    <arg name="camera_info_topic"   default="/rgb/camera_info" />
+    <arg name="marker_length"       default="0.1" />
+    <arg name="camera_frame_id"     default="rgb_camera_link" />
+    <arg name="camera_base_id"     default="camera_base" />
+    <arg name="yaml_file"           default="$(find aruco-tools)/config/poses.yaml"/>
+
+    <include file="$(find aruco-tools)/launch/publishTags.launch">
+      <arg name="yaml_file"         value="$(arg yaml_file)" />
+    </include>
+    <node name="calibCam" pkg="aruco-tools" type="calibCam.py" output="screen" args="$(arg image_topic) $(arg camera_info_topic) $(arg marker_length) $(arg camera_frame_id) $(arg camera_base_id) $(arg yaml_file)"/>
+</launch>

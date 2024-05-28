@@ -1,0 +1,4 @@
+<launch>
+    <arg name="yaml_file" default="$(find aruco-tools)/config/poses.yaml"/>
+    <node name="publishTags" pkg="aruco-tools" type="publishStoredTags.py" output="screen" args="$(arg yaml_file)"/>
+</launch>
