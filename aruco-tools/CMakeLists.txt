@@ -159,6 +159,7 @@ catkin_install_python(PROGRAMS
   scripts/publishStoredTags.py
   scripts/storeTag.py
   scripts/calibCam.py
+  scripts/publishLiveTag.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

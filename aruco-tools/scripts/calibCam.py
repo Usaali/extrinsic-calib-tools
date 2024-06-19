@@ -9,14 +9,14 @@ from sensor_msgs.msg import Image, CameraInfo
 from tf.transformations import quaternion_about_axis, quaternion_matrix, quaternion_from_matrix
 import tf2_ros
 from tf2_geometry_msgs import PoseStamped
-from geometry_msgs.msg import TransformStamped, Pose, Point, Quaternion
+from geometry_msgs.msg import TransformStamped, Transform, Vector3, Pose, Point, Quaternion
 from std_msgs.msg import Header
 import yaml
 import argparse
 import os
 
 class ArucoDetector:
-    def __init__(self, image_topic, camera_info_topic, marker_length, camera_frame_id, camera_base_id, yaml_file):
+    def __init__(self, image_topic, camera_info_topic, marker_length, camera_frame_id, camera_base_id, yaml_file, pub_live):
         self.bridge = CvBridge()
         self.camera_matrix = None
         self.dist_coeffs = None
@@ -26,7 +26,10 @@ class ArucoDetector:
         self.camera_frame_id = camera_frame_id
         self.camera_base_id = camera_base_id
         self.yaml_file = yaml_file
-        
+        self.pub_live = pub_live
+        if(self.pub_live):
+            self.broadcaster = tf2_ros.StaticTransformBroadcaster()
+
         # Subscribers
         self.image_sub = rospy.Subscriber(image_topic, Image, self.image_callback)
         self.camera_info_sub = rospy.Subscriber(camera_info_topic, CameraInfo, self.camera_info_callback)
@@ -82,33 +85,36 @@ class ArucoDetector:
                         t_mat = quaternion_matrix(q)
                         t_mat[:3,3] = [tag_cam_base.pose.position.x, tag_cam_base.pose.position.y, tag_cam_base.pose.position.z]
                         t_mat = np.linalg.inv(t_mat)
-                        print(t_mat[:3,:3])
                         cam_pose = PoseStamped(Header(stamp=rospy.Time.now(), frame_id=f"aruco_{ids[i][0]}"),
                                                Pose(Point(*t_mat[:3,3]),Quaternion(*quaternion_from_matrix(t_mat))))
-                        print(cam_pose)
                         
                         cam_pose_base = self.tf_buffer.transform(cam_pose, "base_link", rospy.Duration(1))
-
-                        self.poses[self.camera_base_id] = {
-                            'parent': 'base_link',
-                            'position': {
-                                'x': cam_pose_base.pose.position.x,
-                                'y': cam_pose_base.pose.position.y,
-                                'z': cam_pose_base.pose.position.z
-                            },
-                            'orientation': {
-                                'x': cam_pose_base.pose.orientation.x,
-                                'y': cam_pose_base.pose.orientation.y,
-                                'z': cam_pose_base.pose.orientation.z,
-                                'w': cam_pose_base.pose.orientation.w
+                        if self.pub_live:
+                            transform = TransformStamped(cam_pose_base.header, self.camera_base_id,
+                                                         Transform(Vector3(cam_pose_base.pose.position.x, cam_pose_base.pose.position.y, cam_pose_base.pose.position.z), 
+                                                                   cam_pose_base.pose.orientation))
+                            self.broadcaster.sendTransform(transform)
+                        else:
+                            self.poses[self.camera_base_id] = {
+                                'parent': 'base_link',
+                                'position': {
+                                    'x': cam_pose_base.pose.position.x,
+                                    'y': cam_pose_base.pose.position.y,
+                                    'z': cam_pose_base.pose.position.z
+                                },
+                                'orientation': {
+                                    'x': cam_pose_base.pose.orientation.x,
+                                    'y': cam_pose_base.pose.orientation.y,
+                                    'z': cam_pose_base.pose.orientation.z,
+                                    'w': cam_pose_base.pose.orientation.w
+                                }
                             }
-                        }
                         # rospy.loginfo(f"Pose for cam: {self.poses[self.camera_base_id]}")
                     except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
                         rospy.logerr(f"Failed to transform to base_link: {e}")
 
-            cv2.imshow("Live Image", cv_image)
-            cv2.waitKey(10)
+            #cv2.imshow("Live Image", cv_image)
+            #cv2.waitKey(10)
 
         except Exception as e:
             rospy.logerr(e)
@@ -136,17 +142,20 @@ def main():
     parser.add_argument('camera_frame_id', type=str, help='The camera frame ID')
     parser.add_argument('camera_base_id', type=str, help='The camera frame ID')
     parser.add_argument('yaml_file', type=str, help='The YAML file to save poses')
+    parser.add_argument('pub_live', type=bool, help='Publish live pose of cam instead of storing it')
 
     args, _ = parser.parse_known_args()
 
-    aruco_detector = ArucoDetector(args.image_topic, args.camera_info_topic, args.marker_length, args.camera_frame_id, args.camera_base_id, args.yaml_file)
+    aruco_detector = ArucoDetector(args.image_topic, args.camera_info_topic, args.marker_length, args.camera_frame_id, args.camera_base_id, args.yaml_file, args.pub_live)
 
     # Wait for user input to save the poses to a YAML file
-    rospy.loginfo("Press Ctrl+C to save the pose to a YAML file.")
+    if(not args.pub_live):
+        rospy.loginfo("Press Ctrl+C to save the pose to a YAML file.")
     rospy.spin()
 
     # Save the poses to a YAML file when the node is shut down
-    aruco_detector.save_poses_to_yaml()
+    if(not args.pub_live):
+        aruco_detector.save_poses_to_yaml()
 
 if __name__ == '__main__':
     main()

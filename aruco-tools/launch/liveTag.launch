@@ -4,6 +4,5 @@
     <arg name="camera_info_topic" default="$(arg camera)/camera_info" />
     <arg name="marker_length" default="0.1" />
     <arg name="camera_frame_id" default="zed2i_left_camera_optical_frame" />
-    <arg name="yaml_file" default="$(find aruco-tools)/config/poses_kuka.yaml"/>
-    <node name="storeTags" pkg="aruco-tools" type="storeTag.py" output="screen" args="$(arg image_topic) $(arg camera_info_topic) $(arg marker_length) $(arg camera_frame_id) $(arg yaml_file)"/>
+    <node name="liveTags" pkg="aruco-tools" type="publishLiveTag.py" output="screen" args="$(arg image_topic) $(arg camera_info_topic) $(arg marker_length) $(arg camera_frame_id)"/>
 </launch>

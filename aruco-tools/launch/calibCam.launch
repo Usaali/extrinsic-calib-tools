@@ -1,13 +1,15 @@
 <launch>
-    <arg name="image_topic"         default="/rgb/image_raw" />
-    <arg name="camera_info_topic"   default="/rgb/camera_info" />
+    <arg name="camera"              default="/camera/color" />
+    <arg name="image_topic"         default="$(arg camera)/image_raw" />
+    <arg name="camera_info_topic"   default="$(arg camera)/camera_info" />
     <arg name="marker_length"       default="0.1" />
-    <arg name="camera_frame_id"     default="rgb_camera_link" />
-    <arg name="camera_base_id"     default="camera_base" />
-    <arg name="yaml_file"           default="$(find aruco-tools)/config/poses.yaml"/>
+    <arg name="camera_frame_id"     default="camera_color_optical_frame" />
+    <arg name="camera_base_id"      default="camera_link" />
+    <arg name="yaml_file"           default="$(find aruco-tools)/config/poses_kuka.yaml"/>
+    <arg name="pub_live"            default="True"/>
 
     <include file="$(find aruco-tools)/launch/publishTags.launch">
       <arg name="yaml_file"         value="$(arg yaml_file)" />
     </include>
-    <node name="calibCam" pkg="aruco-tools" type="calibCam.py" output="screen" args="$(arg image_topic) $(arg camera_info_topic) $(arg marker_length) $(arg camera_frame_id) $(arg camera_base_id) $(arg yaml_file)"/>
+    <node name="calibCam" pkg="aruco-tools" type="calibCam.py" output="screen" args="$(arg image_topic) $(arg camera_info_topic) $(arg marker_length) $(arg camera_frame_id) $(arg camera_base_id) $(arg yaml_file) $(arg pub_live)"/>
 </launch>
