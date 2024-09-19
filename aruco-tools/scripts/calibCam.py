@@ -110,11 +110,12 @@ class ArucoDetector:
                                 }
                             }
                         # rospy.loginfo(f"Pose for cam: {self.poses[self.camera_base_id]}")
+                        rospy.loginfo_once("Aruco detected!")
                     except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
                         rospy.logerr(f"Failed to transform to base_link: {e}")
 
-            #cv2.imshow("Live Image", cv_image)
-            #cv2.waitKey(10)
+            # cv2.imshow("Live Image", cv_image)
+            # cv2.waitKey(1)
 
         except Exception as e:
             rospy.logerr(e)
@@ -131,8 +132,10 @@ class ArucoDetector:
         with open(self.yaml_file, 'w') as file:
             yaml.dump(self.poses, file, default_flow_style=False)
         rospy.loginfo(f"Saved poses to {self.yaml_file}")
+        rospy.loginfo(self.poses)
 
 def main():
+    import sys
     rospy.init_node('aruco_detector', anonymous=True)
 
     parser = argparse.ArgumentParser(description='Aruco Detector and Pose Saver')
@@ -145,6 +148,7 @@ def main():
     parser.add_argument('pub_live', type=bool, help='Publish live pose of cam instead of storing it')
 
     args, _ = parser.parse_known_args()
+    args.pub_live= args.pub_live=="True"
 
     aruco_detector = ArucoDetector(args.image_topic, args.camera_info_topic, args.marker_length, args.camera_frame_id, args.camera_base_id, args.yaml_file, args.pub_live)
 
