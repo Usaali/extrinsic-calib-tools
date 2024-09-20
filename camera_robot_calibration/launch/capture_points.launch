@@ -1,0 +1,15 @@
+<launch>
+
+  <arg name="base_frame_name"       default="/base_link"/>
+  <arg name="camera_frame_name"     default="/rgb_camera_link"/>
+  <arg name="robot_ee_frame_name"   default="/tcp_link"/>
+  <arg name="marker_frame_name"     default="/charuco_diamond"/>
+
+  <!-- Run the node to capture points -->
+  <node name="capture_points" pkg="camera_robot_calibration"
+  type="camera_robot_calibration.py" output="screen"/>
+    <param name="base_frame_name"      type="str"  value="$(arg base_frame_name)"/>
+    <param name="camera_frame_name"    type="str"  value="$(arg camera_frame_name)"/>
+    <param name="robot_ee_frame_name"  type="str"  value="$(arg robot_ee_frame_name)"/>
+    <param name="marker_frame_name"    type="str"  value="$(arg marker_frame_name)"/>
+</launch>
