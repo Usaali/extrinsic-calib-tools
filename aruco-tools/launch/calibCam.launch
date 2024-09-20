@@ -1,12 +1,12 @@
 <launch>
-    <arg name="camera"              default="/camera/color" />
-    <arg name="image_topic"         default="$(arg camera)/image_raw" />
-    <arg name="camera_info_topic"   default="$(arg camera)/camera_info" />
-    <arg name="marker_length"       default="0.1" />
-    <arg name="camera_frame_id"     default="camera_color_optical_frame" />
-    <arg name="camera_base_id"      default="camera_link" />
-    <arg name="yaml_file"           default="$(find aruco-tools)/config/poses_kuka.yaml"/>
-    <arg name="pub_live"            default="True"/>
+    <arg name="camera"             default="/kinect_left/rgb" />
+    <arg name="image_topic"        default="$(arg camera)/image_raw" />
+    <arg name="camera_info_topic"  default="$(arg camera)/camera_info" />
+    <arg name="marker_length"      default="0.1" />
+    <arg name="camera_frame_id"    default="left_rgb_camera_link" />
+    <arg name="camera_base_id"     default="left_camera_base" />
+    <arg name="yaml_file"          default="$(find aruco-tools)/config/poses.yaml"/>
+    <arg name="pub_live"           default="False"/>
 
     <include file="$(find aruco-tools)/launch/publishTags.launch">
       <arg name="yaml_file"         value="$(arg yaml_file)" />

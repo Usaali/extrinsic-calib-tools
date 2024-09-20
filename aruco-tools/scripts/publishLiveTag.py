@@ -60,7 +60,7 @@ class ArucoDetector:
             
             if np.all(ids is not None):
                 for i in range(0, len(ids)):
-                    if(ids[i] != 2):
+                    if(ids[i] != 1):
                         continue
                     _, rvec, tvec = cv2.solvePnP(self.marker_points, corners[i], self.camera_matrix, self.dist_coeffs, None, None, False, cv2.SOLVEPNP_IPPE_SQUARE)
                     cv2.drawFrameAxes(cv_image, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.1)
