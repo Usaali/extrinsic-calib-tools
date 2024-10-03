@@ -5,4 +5,4 @@ find_package(catkin REQUIRED COMPONENTS rospy std_msgs tf geometry_msgs tf_conve
 catkin_python_setup()
 catkin_package()
 
-install(PROGRAMS scripts/camera_robot_calibration.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(PROGRAMS scripts/camera_robot_calibration.py scripts/diamond_marker_publisher.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
